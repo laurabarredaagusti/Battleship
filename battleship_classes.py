@@ -108,9 +108,10 @@ class Board:
         sleep(0.7)
         print("Would you like to place your boats manually or random? \n")
         sleep(0.7)
-        self.placing_boats_mode = input("Enter M for manually or R for random: ")
+        self.placing_boats_mode = input("Enter M for manually or R for random: ").upper()
+        while self.placing_boats_mode != 'M' and self.placing_boats_mode != 'R':
+            self.placing_boats_mode = input("That was not a valid input. Enter M for manually or R for random: ").upper()
 
-    
     def choose_boat_manual(self):
         '''
         This functions allows the user to choose the boats to place manually, and it returns the chosen boat
