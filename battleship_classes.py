@@ -165,16 +165,27 @@ class Board:
         This function lets the user define the starting coordinates of the chosen boat
         ''' 
         boat_first_coordinate_defined = False
+        self.first_coordinate_row = None
+        self.first_coordinate_column = None
 
         while boat_first_coordinate_defined == False:
-
-            self.first_coordinate_row = int(input('Enter the number of the starting position row: '))
+            while self.first_coordinate_row == None:
+                try:
+                    self.first_coordinate_row = int(input('Enter the number of the starting position row: '))
+                except:
+                    print('Please enter a valid character')
+    
             while 0 > self.first_coordinate_row or self.first_coordinate_row > (self.max_rows_board - 1):
-                self.first_coordinate_row = int(input("\nWrong number, enter a number from 0 to 9"))
+                self.first_coordinate_row = int(input("\nWrong number, enter the number of an existing row: "))
 
-            self.first_coordinate_column = int(input('\nEnter the number of the starting position column: '))
+            while self.first_coordinate_column == None:
+                try:
+                    self.first_coordinate_column = int(input('\nEnter the number of the starting position column: '))
+                except:
+                    print('Please enter a valid character')
+
             while 0 > self.first_coordinate_column or self.first_coordinate_column > (self.max_columns_board - 1):
-                self.first_coordinate_column = int(input("\nWrong number, enter a number from 0 to 9"))
+                self.first_coordinate_column = int(input("\nWrong number, enter the number of an existing column: "))
         
             self.boat_first_coordinate = (self.first_coordinate_row, self.first_coordinate_column)
 
