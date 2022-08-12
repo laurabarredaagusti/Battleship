@@ -125,9 +125,15 @@ class Board:
             sleep(0.05)
 
         sleep(0.7)
-        chosen_boat_index = int(input('\nEnter the number of the boat you want to place: '))
+        chosen_boat_index = None
+        while chosen_boat_index == None:
+            try:
+                chosen_boat_index = int(input('\nEnter the number of the boat you want to place: '))
+            except: 
+                print('This was not a valid character, please try again')
+
         while 0 > chosen_boat_index or (len(self.available_boats_list)-1) < chosen_boat_index:
-            chosen_boat_index = int(input('\nWrong number, enter a valid number: '))
+            chosen_boat_index = int(input('\nWrong number, enter a boat number: '))
 
         sleep(0.7)
         self.chosen_boat = self.available_boats_list[chosen_boat_index]
