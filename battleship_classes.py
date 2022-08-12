@@ -87,6 +87,7 @@ class Board:
             self.username = input("Please enter your username: ")
             sleep(0.7)
             print("\nHello" , self.username , ", this is your board  \n")
+            sleep(0.3)
 
 
     def define_print_board(self):
@@ -109,6 +110,7 @@ class Board:
         print("Would you like to place your boats manually or random? \n")
         sleep(0.7)
         self.placing_boats_mode = input("Enter M for manually or R for random: ").upper()
+        print('\n')
         while self.placing_boats_mode != 'M' and self.placing_boats_mode != 'R':
             self.placing_boats_mode = input("That was not a valid input. Enter M for manually or R for random: ").upper()
 
