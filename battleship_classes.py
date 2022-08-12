@@ -230,7 +230,9 @@ class Board:
 
         self.lenght_chosen_boat = len(str(self.chosen_boat))
 
-        self.boat_direction = input("Choose the direction of your boat: N, S, E or W: ")
+        self.boat_direction = input("Choose the direction of your boat: N, S, E or W: ").upper()
+        while self.boat_direction != 'N' and self.boat_direction != 'S' and self.boat_direction != 'E' and self.boat_direction != 'W':
+            self.boat_direction = input("Please enter a valid direction: N, S, E or W: ").upper()
 
 
     def choose_direction_random(self):
