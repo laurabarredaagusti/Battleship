@@ -17,13 +17,12 @@ class Board:
     boat_icon = boat_icon
     octopus_icon = octopus_icon
     first_coordinate_icon = first_coordinate_icon
+    main_available_boats_list = main_available_boats_list.copy()
 
-    available_boats_list = available_boats_list.copy()
 
     def __init__(self, player, board=None):
         self.board = board
         self.player = player
-
         self.board_design()
         self.set_board_elements()
 
@@ -45,17 +44,20 @@ class Board:
         if self.player == 'player':
             self.set_username()
             self.define_print_board()
-            self.define_placing_boats_mode_manual()
+            self.define_placing_boats_mode()
         elif self.player == 'machine':
-            self.define_placing_boats_mode_random()
+            self.placing_boats_mode = "R"
 
-        if self.placing_boats_mode == "M":    
+        self.available_boats_list = self.main_available_boats_list.copy()
+
+        if self.placing_boats_mode == "M":   
             while len(self.available_boats_list) > 0:
                 self.choose_boat_manual()
                 self.define_boat_first_coordinate_manual()
                 self.choose_direction_manual()
                 self.define_boat_position()
                 self.place_boat()
+                
         elif self.placing_boats_mode == "R":
             while len(self.available_boats_list) > 0:
                 self.choose_boat_random()
@@ -66,10 +68,12 @@ class Board:
             if self.player == 'player':
                 self.define_print_board()
 
-        print("\nSuper octopus being placed. If you shoot the octopus, it will shoot to all its edges  \n")
-        self.place_octopus_random()
         if self.player == 'player':
+            print("\nSuper octopus being placed. If you shoot the octopus, it will shoot to all its edges  \n")
+            self.place_octopus_random()
             self.define_print_board()
+        elif self.player == 'machine':
+            self.place_octopus_random()
 
 
     def set_username(self):
@@ -90,11 +94,11 @@ class Board:
         '''
         self.print_board = pd.DataFrame(self.board, columns=list('          '))
         sleep(0.7)
-        print(self.username +'\'s board' , self.arrow_icon)
+        # print(self.username +'\'s board' , self.arrow_icon)
         print(self.print_board, '\n')
         
 
-    def define_placing_boats_mode_manual(self):
+    def define_placing_boats_mode(self):
         '''
         This function asks if the player wants to place the boats manually or randomly
         '''
@@ -104,13 +108,6 @@ class Board:
         print("Would you like to place your boats manually or random? \n")
         sleep(0.7)
         self.placing_boats_mode = input("Enter M for manually or R for random: ")
-
-
-    def define_placing_boats_mode_random(self):
-        '''
-        This function sets the placing boats mode as random
-        '''
-        self.placing_boats_mode = 'R'
 
     
     def choose_boat_manual(self):
@@ -145,6 +142,7 @@ class Board:
         This function randomly chooses a boat from the list of available boats list, and it returns the chosen boat
         It will show all the available boats with their indexes, and let the user enter the index of the boat to place.
         '''
+
         if len(self.available_boats_list) == 1:
             self.chosen_boat = self.available_boats_list[0]
             self.available_boats_list.pop(0)

@@ -16,5 +16,5 @@ boat_7 = boat_icon * 2
 boat_8 = boat_icon * 2
 boat_9 = boat_icon
 
-available_boats_list = [boat_9, boat_8, boat_7, boat_6, boat_5, boat_4, boat_3, boat_2, boat_1, boat_0]
+main_available_boats_list = [boat_9, boat_8, boat_7, boat_6, boat_5, boat_4, boat_3, boat_2, boat_1, boat_0]
 
