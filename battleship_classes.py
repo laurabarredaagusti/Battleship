@@ -50,30 +50,31 @@ class Board:
 
         self.available_boats_list = self.main_available_boats_list.copy()
 
-        if self.placing_boats_mode == "M":   
-            while len(self.available_boats_list) > 0:
-                self.choose_boat_manual()
-                self.define_boat_first_coordinate_manual()
-                self.choose_direction_manual()
-                self.define_boat_position()
-                self.place_boat()
-                
-        elif self.placing_boats_mode == "R":
-            while len(self.available_boats_list) > 0:
-                self.choose_boat_random()
-                self.define_boat_first_coordinate_random()
-                self.choose_direction_random()
-                self.define_boat_position()
-                self.place_boat()
-            if self.player == 'player':
-                self.define_print_board()
+        if self.player == 'player' or self.player == 'machine':
+            if self.placing_boats_mode == "M":   
+                while len(self.available_boats_list) > 0:
+                    self.choose_boat_manual()
+                    self.define_boat_first_coordinate_manual()
+                    self.choose_direction_manual()
+                    self.define_boat_position()
+                    self.place_boat()
+                    
+            elif self.placing_boats_mode == "R":
+                while len(self.available_boats_list) > 0:
+                    self.choose_boat_random()
+                    self.define_boat_first_coordinate_random()
+                    self.choose_direction_random()
+                    self.define_boat_position()
+                    self.place_boat()
+                if self.player == 'player':
+                    self.define_print_board()
 
-        if self.player == 'player':
-            print("\nSuper octopus being placed. If you shoot the octopus, it will shoot to all its edges  \n")
-            self.place_octopus_random()
-            self.define_print_board()
-        elif self.player == 'machine':
-            self.place_octopus_random()
+            if self.player == 'player':
+                print("\nSuper octopus being placed. If you shoot the octopus, it will shoot to all its edges  \n")
+                self.place_octopus_random()
+                self.define_print_board()
+            elif self.player == 'machine':
+                self.place_octopus_random()
 
 
     def set_username(self):
@@ -94,7 +95,7 @@ class Board:
         '''
         self.print_board = pd.DataFrame(self.board, columns=list('          '))
         sleep(0.7)
-        # print(self.username +'\'s board' , self.arrow_icon)
+        print(self.username +'\'s board' , self.arrow_icon)
         print(self.print_board, '\n')
         
 
@@ -161,11 +162,11 @@ class Board:
         while boat_first_coordinate_defined == False:
 
             self.first_coordinate_row = int(input('Enter the number of the starting position row: '))
-            while 0 > self.first_coordinate_row or self.first_coordinate_row > self.max_rows_board:
+            while 0 > self.first_coordinate_row or self.first_coordinate_row > (self.max_rows_board - 1):
                 self.first_coordinate_row = int(input("\nWrong number, enter a number from 0 to 9"))
 
             self.first_coordinate_column = int(input('\nEnter the number of the starting position column: '))
-            while 0 > self.first_coordinate_column or self.first_coordinate_column > self.max_columns_board:
+            while 0 > self.first_coordinate_column or self.first_coordinate_column > (self.max_columns_board - 1):
                 self.first_coordinate_column = int(input("\nWrong number, enter a number from 0 to 9"))
         
             self.boat_first_coordinate = (self.first_coordinate_row, self.first_coordinate_column)
@@ -188,7 +189,7 @@ class Board:
         boat_first_coordinate_defined = False
 
         while boat_first_coordinate_defined == False:
-            self.first_coordinate_row= random.randint(0, (self.max_rows_board - 1))
+            self.first_coordinate_row = random.randint(0, (self.max_rows_board - 1))
             while 0 > self.first_coordinate_row or self.first_coordinate_row > (self.max_rows_board - 1):
                 self.first_coordinate_row = random.randint(0, (self.max_rows_board - 1))
 
@@ -270,48 +271,55 @@ class Board:
         '''
         This function defines the whole position of the boat
         '''
-        self.boat_first_coordinate = [(self.boat_first_coordinate)]
+        self.boat_coordinates = [(self.boat_first_coordinate)]
+        coordinates_row = self.first_coordinate_row
+        coordinates_column = self.first_coordinate_column
 
-        while len(self.boat_first_coordinate) < self.lenght_chosen_boat:
+        while len(self.boat_coordinates) < self.lenght_chosen_boat:
 
             if self.boat_direction == "N":
-                self.first_coordinate_row = self.first_coordinate_row - 1 
+                coordinates_row = coordinates_row - 1 
 
             elif self.boat_direction == "S":
-                self.first_coordinate_row = self.first_coordinate_row + 1
+                coordinates_row = coordinates_row + 1
 
             elif self.boat_direction == "E":
-                self.first_coordinate_column = self. first_coordinate_column + 1
+                coordinates_column = coordinates_column + 1
 
             elif self.boat_direction == "W":
-                self.first_coordinate_column = self.first_coordinate_column - 1
+                coordinates_column = coordinates_column - 1
 
-            self.boat_first_coordinate.append((self.first_coordinate_row, self.first_coordinate_column))
-
+            self.boat_coordinates.append((coordinates_row, coordinates_column))
 
     def place_boat(self):
         '''
         This functions checks if there's another boat crossing the new position and places the boat if there is not
         '''
-        boat_positions_list = []
+        try:
+            boat_positions_list = []
 
-        for coordinate in self.boat_first_coordinate:
+            for coordinate in self.boat_coordinates:
 
-            if coordinate in boat_positions_list:
-                self.boat_first_coordinate.pop[0]
+                if coordinate in boat_positions_list:
+                    self.boat_coordinates.pop[0]
 
-        if len(self.boat_first_coordinate) == self.lenght_chosen_boat:
-            boat_positions_list.append(self.boat_first_coordinate)
+            if len(self.boat_coordinates) == self.lenght_chosen_boat:
+                boat_positions_list.append(self.boat_coordinates)
 
-            for coordinate in self.boat_first_coordinate:
-                self.board[coordinate] = self.boat_icon
-            if self.placing_boats_mode == "M":
-                self.define_print_board()
+                for coordinate in self.boat_coordinates:
+                    self.board[coordinate] = self.boat_icon
+                if self.placing_boats_mode == "M":
+                    self.define_print_board()
 
-        else:
-            if self.placing_boats_mode == "M":
-                print("There is already a bot in this position, please choose a different one")
-
+            else:
+                if self.placing_boats_mode == "M":
+                    print("There is already a bot in this position, please choose a different one")
+        except:
+            if self.player == 'player' and self.placing_boats_mode == 'M':
+                print('You can\'t place a boat in this direction, please choose a different one')
+                self.choose_direction_manual()
+                self.define_boat_position()
+                self.place_boat()
 
     def place_octopus_random(self):
         '''
