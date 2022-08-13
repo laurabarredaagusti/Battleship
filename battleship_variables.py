@@ -4,6 +4,9 @@ water_icon = "\U000026AA"
 boat_icon = "\U000026AB"
 octopus_icon = "\U0001F419"
 first_coordinate_icon = "\U0001F518"
+touched_icon = "\U0000274C"
+shoot_water_icon = "\U0001F300"
+shoot_octopus_icon = "\U0000274C"
 
 boat_0 = boat_icon * 4
 boat_1 = boat_icon * 4

@@ -1,7 +1,7 @@
 import numpy as np
 import random
 # import os
-# import pygame
+import pygame
 # from emoji import emojize
 import pandas as pd
 from time import sleep
@@ -356,3 +356,189 @@ class Board:
             if self.board[octopus_position] != boat_icon:
                 self.board[octopus_position] = self.octopus_icon
                 self.octopus_positioned = True
+
+class Shoot:
+    '''
+    This class contains all the necessary functions to choose
+    '''
+    water_icon = water_icon
+    boat_icon = boat_icon
+    octopus_icon = octopus_icon
+    touched_icon = touched_icon
+    shoot_water_icon = shoot_water_icon
+    shoot_octopus_icon = shoot_octopus_icon
+
+    pygame.init()
+    pygame.mixer.init()
+
+    def __init__(self, player, board, target_board):
+        self.player = player
+        self.board = board
+        self.target_board = target_board
+
+        if player == 'player':
+            self.define_shooting_mode()
+        elif player == 'machine':
+            self.shooting_mode = 'R'
+
+    def play_boat_sound():
+        '''
+        This function plays the sound for a boat shoot
+        '''
+        pygame.mixer.Sound.play(pygame.mixer.Sound("boat_sound.wav"))
+
+
+    def play_water_sound():
+        '''
+        This function plays the sound for a water shoot
+        '''
+        pygame.mixer.Sound.play(pygame.mixer.Sound("water_sound.wav"))
+        
+
+    def play_octopus_sound():
+        '''
+        This functions plays the sound for an octopus shoot
+        '''
+        pygame.mixer.Sound.play(pygame.mixer.Sound("octopus_sound.wav"))
+
+
+    def define_shooting_mode(self):
+        '''
+        This function let's the player decide if he wants to choose his shooting targets or he wants random targets
+        '''
+        print("Would you like to choose your target or do you want a random target? \n")
+        sleep(0.7)
+        self.shooting_mode = input("Enter M for manual or R for random: ")
+        sleep(0.7)
+
+
+    def print_player_board(self):
+        '''
+        This functions prints the player's board
+        '''
+        self.print_board = pd.DataFrame(self.board, columns=list('          '))
+        sleep(0.7)
+        print(self.username +'\'s board' , self.arrow_icon)
+        print(self.print_board, '\n')
+
+
+    def define_print_target_board(self):
+        '''
+        This functions prints the target's board
+        '''
+        self.print_target_board = pd.DataFrame(self.target_board, columns=list('          '))
+        sleep(0.7)
+        print('Machine\'s board' , self.arrow_icon)
+        print(self.print_target_board, '\n')
+
+    
+    def define_shooting_target_random(self):
+        '''
+        This function randomly chooses the target coordinates
+        '''
+        self.target_row = random.randint(0, 9)
+        self.target_column = random.randint(0, 9)
+        self.target = (self.target_row, self.target_column)
+        self.target_octopus = [(self.target)]
+
+
+    def define_shooting_target_manual(self):
+        '''
+        This function let's the user set manual target coordinates
+        '''
+        self.target = False
+        self.target_row = False
+        self.target_column = False
+
+        while self.target == False:
+            while self.target_row == None:
+                try:
+                    self.target_row = int(input('Enter the number of the target row: '))
+                except:
+                    print('Please enter a valid character')
+    
+            while 0 > self.target_row or self.target_row > (self.max_rows_board - 1):
+                self.target_row = int(input("\nWrong number, enter the number of an existing row: "))
+
+            while self.target_column == None:
+                try:
+                    self.target_column = int(input('\nEnter the number of the starting position column: '))
+                except:
+                    print('Please enter a valid character')
+
+            while 0 > self.target_column or self.target_column > (self.max_columns_board - 1):
+                self.target_column = int(input("\nWrong number, enter the number of an existing column: "))
+        
+            self.target = (self.target_row, self.target_column)
+
+
+    def result_shoot_touched(self):
+        '''
+        Función que activa el sonido del disparo y cambia el icono a 'tocado'
+        '''
+        print("Touched \n")
+        self.play_boat_sound()
+        self.target_board[self.target] = self.touched_icon
+        self.board[self.target] = self.touched_icon
+
+    
+    def result_shoot_water(self):
+        '''
+        Función que activa el sonido del agua y cambia el icono a 'agua'
+        ''' 
+        print("Water \n")
+        self.play_water_sound()
+        self.target_board[self.target] = self.shoot_water_icon
+        self.board[self.target] = self.shoot_water_icon
+
+
+    def result_shoot_octopus(self):
+        '''
+        Funución que activa el sonido del pulpo y cambia el icono a pulpo disparado
+        '''
+        print("Octopus \n")
+        self.play_octopus_sound()
+        self.target_row = self.target_row - 1
+        self.target_octopus.append((self.target_row, self.target_column))
+        self.target_column = self.target_column - 1
+        self.target_octopus.append((self.target_row, self.target_column))
+        self.target_row = self.target_row + 1
+        self.target_octopus.append((self.target_row, self.target_column))
+        self.target_row = self.target_row + 1
+        self.target_octopus.append((self.target_row, self.target_column))
+        self.target_column = self.target_column + 1
+        self.target_octopus.append((self.target_row, self.target_column))
+        self.target_column = self.target_column + 1
+        self.target_octopus.append((self.target_row, self.target_column))
+        self.target_row = self.target_row - 1
+        self.target_octopus.append((self.target_row, self.target_column))
+        self.target_row = self.target_row - 1
+        self.target_octopus.append((self.target_row, self.target_column))
+        
+        for elem in self.target_octopus:
+            try:
+                self.target_board[elem] = shoot_octopus_icon
+                self.board[elem] = shoot_octopus_icon
+            except:
+                continue
+
+
+    def action_shoot(self):
+        '''
+        Función que realiza disparos hasta que el target es agua
+        '''
+        while self.board[self.target] != self.shoot_water_icon:
+            sleep(0.7)
+            if self.board[self.target] != self.touched_icon and self.board[self.target] != self.shoot_water_icon:
+
+                    if self.board[self.target] == self.boat_icon:
+                        self.result_shoot_touched(self)
+
+                    elif self.board[self.target] == self.octopus_icon:
+                        self.result_shoot_octopus(self)
+                    
+                    else:
+                        self.result_shoot_water(self)
+            else:
+                print("You have already shoot to this position, please choose your cell again, \n")
+
