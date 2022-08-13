@@ -27,6 +27,8 @@ class Board:
         self.game_state = {}
         self.board_design()
         self.set_board_elements()
+        self.key_names_board()
+        self.update_json_file()
 
 
     def board_design(self):
@@ -77,7 +79,6 @@ class Board:
                 print("\nSuper octopus being placed. If you shoot the octopus, it will shoot to all its edges  \n")
                 self.place_octopus_random()
                 self.define_print_board()
-                self.update_json_file()
             elif self.player == 'machine':
                 self.place_octopus_random()
 
@@ -325,11 +326,15 @@ class Board:
                 self.octopus_positioned = True
 
 
+    def key_names_board(self):
+        key_name = self.player + '_board'
+        self.game_state[key_name] = self.board
+
+
     def update_json_file(self):
         with open(self.json_file, 'rb') as fp:
             game_state_main = pickle.load(fp)
         game_state_main.update(self.game_state)
-        print(game_state_main)
         with open('game_state.json', 'wb') as fp:
             pickle.dump(game_state_main, fp)
 
@@ -352,10 +357,14 @@ class Shoot:
     pygame.init()
     pygame.mixer.init()
 
-    def __init__(self, player, board, target_board):
+    def __init__(self, player, target):
+
+        key_board = player + '_board'
+        key_target = target + '_board'
+
         self.player = player
-        self.board = board
-        self.target_board = target_board
+        self.board = self.game_state[key_board]
+        self.target_board = self.game_state[key_target]
 
         if player == 'player':
             self.define_shooting_mode()
@@ -505,11 +514,12 @@ class Shoot:
         '''
         Función que realiza disparos hasta que el target es agua
         '''
+        self.define_print_target_board()
         if self.shooting_mode == 'R':
-            self.define_shooting_target_random
+            self.define_shooting_target_random()
         else:
-            self.define_shooting_target_manual
-            
+            self.define_shooting_target_manual()
+
         while self.board[self.target] != self.shoot_water_icon:
             sleep(0.7)
             if self.board[self.target] != self.touched_icon and self.board[self.target] != self.shoot_water_icon:
