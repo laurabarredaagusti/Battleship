@@ -14,6 +14,7 @@ machine_shoot = Shoot('machine', 'player_empty')
 
 while True:
     player_shoot.action_shoot()
+    machine_shoot.action_shoot()
 #     # shooting_user(board_machine, board_shooting_user)
 #     # if "\U000026F5" not in board_machine:
 #     #     print("\nUser wins  \n")

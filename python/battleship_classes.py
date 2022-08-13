@@ -371,25 +371,25 @@ class Shoot:
         elif player == 'machine':
             self.shooting_mode = 'R'
 
-    def play_boat_sound():
+    def play_boat_sound(self):
         '''
         This function plays the sound for a boat shoot
         '''
-        pygame.mixer.Sound.play(pygame.mixer.Sound("boat_sound.wav"))
+        pygame.mixer.Sound.play(pygame.mixer.Sound("../sound/boat_sound.wav"))
 
 
-    def play_water_sound():
+    def play_water_sound(self):
         '''
         This function plays the sound for a water shoot
         '''
-        pygame.mixer.Sound.play(pygame.mixer.Sound("water_sound.wav"))
+        pygame.mixer.Sound.play(pygame.mixer.Sound("../sound/water_sound.wav"))
         
 
-    def play_octopus_sound():
+    def play_octopus_sound(self):
         '''
         This functions plays the sound for an octopus shoot
         '''
-        pygame.mixer.Sound.play(pygame.mixer.Sound("octopus_sound.wav"))
+        pygame.mixer.Sound.play(pygame.mixer.Sound("../sound/octopus_sound.wav"))
 
 
     def define_shooting_mode(self):
@@ -398,7 +398,9 @@ class Shoot:
         '''
         print("Would you like to choose your target or do you want a random target? \n")
         sleep(0.7)
-        self.shooting_mode = input("Enter M for manual or R for random: ")
+        self.shooting_mode = input("Enter M for manual or R for random: ").upper()
+        while self.shooting_mode != 'M' and self.shooting_mode != 'R':
+            self.shooting_mode = input("That was not a valid input. Enter M for manually or R for random: ").upper()
         sleep(0.7)
 
 
@@ -406,6 +408,8 @@ class Shoot:
         '''
         This functions prints the player's board
         '''
+        print("\nMachine's turn  \n")
+        sleep(0.7)
         self.print_board = pd.DataFrame(self.board, columns=list('          '))
         sleep(0.7)
         print(self.game_state['username'] +'\'s board' , self.arrow_icon)
@@ -416,6 +420,8 @@ class Shoot:
         '''
         This functions prints the target's board
         '''
+        print("\nYour turn  \n")
+        sleep(0.7)
         self.print_target_board = pd.DataFrame(self.target_board, columns=list('          '))
         sleep(0.7)
         print('Machine\'s board' , self.arrow_icon)
@@ -514,7 +520,12 @@ class Shoot:
         '''
         Función que realiza disparos hasta que el target es agua
         '''
-        self.define_print_target_board()
+
+        if self.player == 'player':
+            self.define_print_target_board()
+        elif self.player == 'machine':
+            self.define_print_player_board()
+
         if self.shooting_mode == 'R':
             self.define_shooting_target_random()
         else:
@@ -526,15 +537,21 @@ class Shoot:
 
                     if self.board[self.target] == self.boat_icon:
                         self.result_shoot_touched()
-                        self.play_boat_sound()
+                        # self.play_boat_sound()
+                        self.define_print_target_board()
 
                     elif self.board[self.target] == self.octopus_icon:
                         self.result_shoot_octopus()
-                        self.play_octopus_sound()
+                        # self.play_octopus_sound()
+                        self.define_print_target_board()
                     
                     else:
                         self.result_shoot_water()
-                        self.play_water_sound()
+                        # self.play_water_sound()
+                        self.define_print_target_board()
             else:
-                print("You have already shoot to this position, please choose your cell again, \n")
-
+                if self.shooting_mode == 'R':
+                    self.define_shooting_target_random()
+                else:
+                    print("You have already shoot to this position, please choose your cell again, \n")
+                    self.define_shooting_target_manual()
