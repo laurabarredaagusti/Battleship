@@ -5,8 +5,12 @@ import pygame
 # from emoji import emojize
 import pandas as pd
 from time import sleep
+import json
+import pickle
 
 from battleship_variables import *
+from battleship_game_state import *
+
 
 class Board:
     '''
@@ -18,14 +22,17 @@ class Board:
     octopus_icon = octopus_icon
     first_coordinate_icon = first_coordinate_icon
     main_available_boats_list = main_available_boats_list.copy()
+    json_file = 'game_state.json'
 
+    with open(json_file, 'rb') as fp:
+        game_state = pickle.load(fp)
 
     def __init__(self, player, board=None):
         self.board = board
         self.player = player
         self.board_design()
         self.set_board_elements()
-
+        self.update_json_file()
 
     def board_design(self):
         '''
@@ -85,6 +92,7 @@ class Board:
             print("\nWelcome to the Battleship game \n")
             sleep(0.7)
             self.username = input("Please enter your username: ")
+            self.game_state['username'] = self.username
             sleep(0.7)
             print("\nHello" , self.username , ", this is your board  \n")
             sleep(0.3)
@@ -245,48 +253,8 @@ class Board:
 
         self.first_coordinate_row = int(self.first_coordinate_row)
         self.first_coordinate_column = int(self.first_coordinate_column)
-
         self.lenght_chosen_boat = len(str(self.chosen_boat))
-        if (self.max_columns_board - self.first_coordinate_column) < self.lenght_chosen_boat:
-            if (self.max_rows_board - self.first_coordinate_row) < self.lenght_chosen_boat:
-                direction_list.remove("S")
-                direction_list.remove("E")
-                self.boat_direction = random.choice(direction_list)
-
-            elif self.first_coordinate_row < self.lenght_chosen_boat: 
-                direction_list.remove("N")
-                direction_list.remove("E")
-                self.boat_direction = random.choice(direction_list)
-
-            else:
-                direction_list.remove("E")
-                self.boat_direction = random.choice(direction_list)
-    
-        elif self.first_coordinate_column < self.lenght_chosen_boat:
-            if self.first_coordinate_column < self.lenght_chosen_boat:
-                direction_list.remove("N")
-                direction_list.remove("W")
-                self.boat_direction = random.choice(direction_list)
-
-            elif (self.max_rows_board - self.first_coordinate_row) < self.lenght_chosen_boat:
-                direction_list.remove("S")
-                direction_list.remove("E")
-                self.boat_direction = random.choice(direction_list)
-                
-            else: 
-                direction_list.remove("W")
-                self.boat_direction = random.choice(direction_list)
-
-        elif (self.max_rows_board - self.first_coordinate_row) < self.lenght_chosen_boat: 
-            direction_list.remove("S")
-            self.boat_direction = random.choice(direction_list)
-
-        elif self.first_coordinate_row < self.lenght_chosen_boat: 
-            direction_list.remove("N")
-            self.boat_direction = random.choice(direction_list)
-
-        else:
-            self.boat_direction = random.choice(direction_list)
+        self.boat_direction = random.choice(direction_list)
 
 
     def define_boat_position(self):
@@ -312,6 +280,7 @@ class Board:
                 coordinates_column = coordinates_column - 1
 
             self.boat_coordinates.append((coordinates_row, coordinates_column))
+
 
     def place_boat(self):
         '''
@@ -357,6 +326,22 @@ class Board:
                 self.board[octopus_position] = self.octopus_icon
                 self.octopus_positioned = True
 
+
+    def update_json_file(self):
+        with open(self.json_file, 'rb') as fp:
+            game_state_main = pickle.load(fp)
+        game_state_main.update(self.game_state)
+        print(game_state_main)
+        with open('game_state.json', 'wb') as fp:
+            pickle.dump(game_state_main, fp)
+        # with open('game_state.json', 'r') as j:
+        #     data = json.load(j.read())
+        # data.update(self.game_state)
+
+        # with open('game_state.json', 'wb') as fp:
+        #     pickle.dump(data, fp)
+
+
 class Shoot:
     '''
     This class contains all the necessary functions to choose
@@ -364,6 +349,7 @@ class Shoot:
     water_icon = water_icon
     boat_icon = boat_icon
     octopus_icon = octopus_icon
+    arrow_icon = arrow_icon
     touched_icon = touched_icon
     shoot_water_icon = shoot_water_icon
     shoot_octopus_icon = shoot_octopus_icon

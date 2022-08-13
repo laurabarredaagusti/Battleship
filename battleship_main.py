@@ -9,4 +9,4 @@ board_machine_empty = Board("machine_empty")
 print("Now the real game starts  \n")
 sleep(0.7)
 
-player_shoot = Shoot('player', board_user, board_machine_empty)
+# player_shoot = Shoot('player', board_user, board_machine_empty)
