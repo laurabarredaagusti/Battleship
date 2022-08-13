@@ -1,15 +1,11 @@
 import numpy as np
 import random
-# import os
 import pygame
-# from emoji import emojize
 import pandas as pd
 from time import sleep
-import json
 import pickle
 
 from battleship_variables import *
-from battleship_game_state import *
 
 
 class Board:
@@ -24,15 +20,14 @@ class Board:
     main_available_boats_list = main_available_boats_list.copy()
     json_file = 'game_state.json'
 
-    with open(json_file, 'rb') as fp:
-        game_state = pickle.load(fp)
 
     def __init__(self, player, board=None):
         self.board = board
         self.player = player
+        self.game_state = {}
         self.board_design()
         self.set_board_elements()
-        self.update_json_file()
+
 
     def board_design(self):
         '''
@@ -42,6 +37,8 @@ class Board:
                     self.board = np.full((10,10), fill_value=self.water_icon)
 
         self.max_rows_board, self.max_columns_board = self.board.shape
+        self.game_state['max_rows_board'] = self.max_rows_board      
+        self.game_state['max_columns_board'] = self.max_columns_board   
 
 
     def set_board_elements(self):
@@ -80,6 +77,7 @@ class Board:
                 print("\nSuper octopus being placed. If you shoot the octopus, it will shoot to all its edges  \n")
                 self.place_octopus_random()
                 self.define_print_board()
+                self.update_json_file()
             elif self.player == 'machine':
                 self.place_octopus_random()
 
@@ -334,12 +332,6 @@ class Board:
         print(game_state_main)
         with open('game_state.json', 'wb') as fp:
             pickle.dump(game_state_main, fp)
-        # with open('game_state.json', 'r') as j:
-        #     data = json.load(j.read())
-        # data.update(self.game_state)
-
-        # with open('game_state.json', 'wb') as fp:
-        #     pickle.dump(data, fp)
 
 
 class Shoot:
@@ -353,6 +345,9 @@ class Shoot:
     touched_icon = touched_icon
     shoot_water_icon = shoot_water_icon
     shoot_octopus_icon = shoot_octopus_icon
+
+    with open('game_state.json', 'rb') as fp:
+        game_state = pickle.load(fp)
 
     pygame.init()
     pygame.mixer.init()
@@ -404,7 +399,7 @@ class Shoot:
         '''
         self.print_board = pd.DataFrame(self.board, columns=list('          '))
         sleep(0.7)
-        print(self.username +'\'s board' , self.arrow_icon)
+        print(self.game_state['username'] +'\'s board' , self.arrow_icon)
         print(self.print_board, '\n')
 
 
@@ -443,7 +438,7 @@ class Shoot:
                 except:
                     print('Please enter a valid character')
     
-            while 0 > self.target_row or self.target_row > (self.max_rows_board - 1):
+            while 0 > self.target_row or self.target_row > (self.game_state['max_rows_board'] - 1):
                 self.target_row = int(input("\nWrong number, enter the number of an existing row: "))
 
             while self.target_column == None:
@@ -452,7 +447,7 @@ class Shoot:
                 except:
                     print('Please enter a valid character')
 
-            while 0 > self.target_column or self.target_column > (self.max_columns_board - 1):
+            while 0 > self.target_column or self.target_column > (self.game_state['max_columns_board'] - 1):
                 self.target_column = int(input("\nWrong number, enter the number of an existing column: "))
         
             self.target = (self.target_row, self.target_column)
@@ -463,7 +458,6 @@ class Shoot:
         Función que activa el sonido del disparo y cambia el icono a 'tocado'
         '''
         print("Touched \n")
-        self.play_boat_sound()
         self.target_board[self.target] = self.touched_icon
         self.board[self.target] = self.touched_icon
 
@@ -473,7 +467,6 @@ class Shoot:
         Función que activa el sonido del agua y cambia el icono a 'agua'
         ''' 
         print("Water \n")
-        self.play_water_sound()
         self.target_board[self.target] = self.shoot_water_icon
         self.board[self.target] = self.shoot_water_icon
 
@@ -483,7 +476,6 @@ class Shoot:
         Funución que activa el sonido del pulpo y cambia el icono a pulpo disparado
         '''
         print("Octopus \n")
-        self.play_octopus_sound()
         self.target_row = self.target_row - 1
         self.target_octopus.append((self.target_row, self.target_column))
         self.target_column = self.target_column - 1
@@ -513,18 +505,26 @@ class Shoot:
         '''
         Función que realiza disparos hasta que el target es agua
         '''
+        if self.shooting_mode == 'R':
+            self.define_shooting_target_random
+        else:
+            self.define_shooting_target_manual
+            
         while self.board[self.target] != self.shoot_water_icon:
             sleep(0.7)
             if self.board[self.target] != self.touched_icon and self.board[self.target] != self.shoot_water_icon:
 
                     if self.board[self.target] == self.boat_icon:
-                        self.result_shoot_touched(self)
+                        self.result_shoot_touched()
+                        self.play_boat_sound()
 
                     elif self.board[self.target] == self.octopus_icon:
-                        self.result_shoot_octopus(self)
+                        self.result_shoot_octopus()
+                        self.play_octopus_sound()
                     
                     else:
-                        self.result_shoot_water(self)
+                        self.result_shoot_water()
+                        self.play_water_sound()
             else:
                 print("You have already shoot to this position, please choose your cell again, \n")
 
