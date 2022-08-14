@@ -73,11 +73,14 @@ class Board:
                     self.define_boat_position()
                     self.place_boat()
                 if self.player == 'player':
+                    print('\nPlacing boats\n')
+                    sleep(0.7)
                     self.define_print_board()
 
             if self.player == 'player':
                 print("\nSuper octopus being placed. If you shoot the octopus, it will shoot to all its edges  \n")
                 self.place_octopus_random()
+                sleep(0.7)
                 self.define_print_board()
             elif self.player == 'machine':
                 self.place_octopus_random()
@@ -117,9 +120,8 @@ class Board:
         print("Would you like to place your boats manually or random? \n")
         sleep(0.7)
         self.placing_boats_mode = input("Enter M for manually or R for random: ").upper()
-        print('\n')
         while self.placing_boats_mode != 'M' and self.placing_boats_mode != 'R':
-            self.placing_boats_mode = input("That was not a valid input. Enter M for manually or R for random: ").upper()
+            self.placing_boats_mode = input("\nThat was not a valid input. Enter M for manually or R for random: ").upper()
 
     def choose_boat_manual(self):
         '''
@@ -350,21 +352,24 @@ class Shoot:
     touched_icon = touched_icon
     shoot_water_icon = shoot_water_icon
     shoot_octopus_icon = shoot_octopus_icon
+    target_icon = first_coordinate_icon
 
-    with open('game_state.json', 'rb') as fp:
+    json_file = 'game_state.json'
+
+    with open(json_file, 'rb') as fp:
         game_state = pickle.load(fp)
 
     pygame.init()
     pygame.mixer.init()
 
-    def __init__(self, player, target):
+    def __init__(self, player, target, empty_target):
 
-        key_board = player + '_board'
-        key_target = target + '_board'
+        key_target_board = target + '_board'
+        key_empty_target_board = empty_target + '_board'
 
         self.player = player
-        self.board = self.game_state[key_board]
-        self.target_board = self.game_state[key_target]
+        self.target_board = self.game_state[key_target_board]
+        self.empty_target_board = self.game_state[key_empty_target_board]
 
         if player == 'player':
             self.define_shooting_mode()
@@ -399,32 +404,29 @@ class Shoot:
         print("Would you like to choose your target or do you want a random target? \n")
         sleep(0.7)
         self.shooting_mode = input("Enter M for manual or R for random: ").upper()
+        print('\n')
         while self.shooting_mode != 'M' and self.shooting_mode != 'R':
             self.shooting_mode = input("That was not a valid input. Enter M for manually or R for random: ").upper()
-        sleep(0.7)
 
 
-    def print_player_board(self):
-        '''
-        This functions prints the player's board
-        '''
-        print("\nMachine's turn  \n")
-        sleep(0.7)
-        self.print_board = pd.DataFrame(self.board, columns=list('          '))
-        sleep(0.7)
-        print(self.game_state['username'] +'\'s board' , self.arrow_icon)
-        print(self.print_board, '\n')
+    def set_username(self):
+        if self.player == 'machine':
+            self.username = self.game_state['username']
+        elif self.player == 'player':
+            self.username = 'Machine'
 
 
     def define_print_target_board(self):
         '''
         This functions prints the target's board
         '''
-        print("\nYour turn  \n")
         sleep(0.7)
-        self.print_target_board = pd.DataFrame(self.target_board, columns=list('          '))
+        if self.player == 'player':
+            self.print_target_board = pd.DataFrame(self.empty_target_board, columns=list('          '))
+        elif self.player == 'machine':
+            self.print_target_board = pd.DataFrame(self.target_board, columns=list('          '))
         sleep(0.7)
-        print('Machine\'s board' , self.arrow_icon)
+        print('\n', self.username, '\'s board' , self.arrow_icon)
         print(self.print_target_board, '\n')
 
     
@@ -467,30 +469,35 @@ class Shoot:
         
             self.target = (self.target_row, self.target_column)
 
+    
+    def icon_target_changed(self):
+        self.target_board[self.target] = self.target_icon
+        self.empty_target_board[self.target] = self.target_icon
+    
 
     def result_shoot_touched(self):
         '''
         Función que activa el sonido del disparo y cambia el icono a 'tocado'
         '''
-        print("Touched \n")
+        print("Touched")
         self.target_board[self.target] = self.touched_icon
-        self.board[self.target] = self.touched_icon
+        self.empty_target_board[self.target] = self.touched_icon
 
     
     def result_shoot_water(self):
         '''
         Función que activa el sonido del agua y cambia el icono a 'agua'
         ''' 
-        print("Water \n")
+        print("Water")
         self.target_board[self.target] = self.shoot_water_icon
-        self.board[self.target] = self.shoot_water_icon
+        self.empty_target_board[self.target] = self.shoot_water_icon
 
 
     def result_shoot_octopus(self):
         '''
         Funución que activa el sonido del pulpo y cambia el icono a pulpo disparado
         '''
-        print("Octopus \n")
+        print("Octopus")
         self.target_row = self.target_row - 1
         self.target_octopus.append((self.target_row, self.target_column))
         self.target_column = self.target_column - 1
@@ -511,7 +518,7 @@ class Shoot:
         for elem in self.target_octopus:
             try:
                 self.target_board[elem] = shoot_octopus_icon
-                self.board[elem] = shoot_octopus_icon
+                self.empty_target_board[elem] = shoot_octopus_icon
             except:
                 continue
 
@@ -520,27 +527,39 @@ class Shoot:
         '''
         Función que realiza disparos hasta que el target es agua
         '''
-
         if self.player == 'player':
-            self.define_print_target_board()
+            print("Your turn")
         elif self.player == 'machine':
-            self.define_print_player_board()
+            print('Machine\'s turn')
+        sleep(0.7)
+        self.set_username()
+        self.define_print_target_board()
 
         if self.shooting_mode == 'R':
             self.define_shooting_target_random()
         else:
             self.define_shooting_target_manual()
 
-        while self.board[self.target] != self.shoot_water_icon:
-            sleep(0.7)
-            if self.board[self.target] != self.touched_icon and self.board[self.target] != self.shoot_water_icon:
+        print('Shooting')
+        sleep(0.7)
+        self.icon_target_changed()
+        self.define_print_target_board()
+        self.result_shoot()
+        self.update_json_file()
 
-                    if self.board[self.target] == self.boat_icon:
+    
+    def result_shoot(self):
+
+        while self.empty_target_board[self.target] != self.shoot_water_icon:
+            sleep(0.7)
+            if self.empty_target_board[self.target] != self.touched_icon and self.empty_target_board[self.target] != self.shoot_water_icon:
+
+                    if self.empty_target_board[self.target] == self.boat_icon:
                         self.result_shoot_touched()
                         # self.play_boat_sound()
                         self.define_print_target_board()
 
-                    elif self.board[self.target] == self.octopus_icon:
+                    elif self.empty_target_board[self.target] == self.octopus_icon:
                         self.result_shoot_octopus()
                         # self.play_octopus_sound()
                         self.define_print_target_board()
@@ -555,3 +574,12 @@ class Shoot:
                 else:
                     print("You have already shoot to this position, please choose your cell again, \n")
                     self.define_shooting_target_manual()
+
+
+    def update_json_file(self):
+        with open(self.json_file, 'rb') as fp:
+            game_state_main = pickle.load(fp)
+        game_state_main.update(self.game_state)
+        with open('game_state.json', 'wb') as fp:
+            pickle.dump(game_state_main, fp)
+

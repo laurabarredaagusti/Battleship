@@ -1,5 +1,8 @@
 from battleship_classes import *
 from battleship_variables import *
+from battleship_game_state import *
+
+empty_game()
 
 Board("player")
 Board ("player_empty")
@@ -9,8 +12,8 @@ Board("machine_empty")
 print("Now the real game starts  \n")
 sleep(0.7)
 
-player_shoot = Shoot('player', 'machine_empty')
-machine_shoot = Shoot('machine', 'player_empty')
+player_shoot = Shoot('player', 'machine', 'machine_empty')
+machine_shoot = Shoot('machine', 'player', 'player_empty')
 
 while True:
     player_shoot.action_shoot()
