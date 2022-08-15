@@ -18,7 +18,10 @@ class Board:
     octopus_icon = octopus_icon
     first_coordinate_icon = first_coordinate_icon
     main_available_boats_list = main_available_boats_list.copy()
-    json_file = 'game_state.json'
+    json_file = json_file
+
+    with open(json_file, 'rb') as fp:
+        game_state = pickle.load(fp)
 
 
     def __init__(self, player, board=None):
@@ -28,6 +31,7 @@ class Board:
         self.board_design()
         self.set_board_elements()
         self.key_names_board()
+        self.create_empty_player_board()
         self.update_json_file()
 
 
@@ -73,6 +77,7 @@ class Board:
                     self.define_boat_position()
                     self.place_boat()
                 if self.player == 'player':
+                    sleep(0.7)
                     print('\nPlacing boats\n')
                     sleep(0.7)
                     self.define_print_board()
@@ -332,6 +337,11 @@ class Board:
         key_name = self.player + '_board'
         self.game_state[key_name] = self.board
 
+    
+    def create_empty_player_board(self):
+        if self.player == 'player':
+            self.game_state['player_empty_board'] = self.game_state['player_board']
+
 
     def update_json_file(self):
         with open(self.json_file, 'rb') as fp:
@@ -353,8 +363,7 @@ class Shoot:
     shoot_water_icon = shoot_water_icon
     shoot_octopus_icon = shoot_octopus_icon
     target_icon = first_coordinate_icon
-
-    json_file = 'game_state.json'
+    json_file = json_file
 
     with open(json_file, 'rb') as fp:
         game_state = pickle.load(fp)
@@ -421,10 +430,7 @@ class Shoot:
         This functions prints the target's board
         '''
         sleep(0.7)
-        if self.player == 'player':
-            self.print_target_board = pd.DataFrame(self.empty_target_board, columns=list('          '))
-        elif self.player == 'machine':
-            self.print_target_board = pd.DataFrame(self.target_board, columns=list('          '))
+        self.print_target_board = pd.DataFrame(self.target_board, columns=list('          '))
         sleep(0.7)
         print('\n', self.username, '\'s board' , self.arrow_icon)
         print(self.print_target_board, '\n')
@@ -470,10 +476,20 @@ class Shoot:
             self.target = (self.target_row, self.target_column)
 
     
-    def icon_target_changed(self):
-        self.target_board[self.target] = self.target_icon
-        self.empty_target_board[self.target] = self.target_icon
-    
+    # def icon_target_changed(self):
+    #     # self.empty_target_board[self.target] = self.target_icon
+    #     print('This is my empty target board')
+    #     print(self.empty_target_board)
+    #     print('This is my regular board')
+    #     print(self.target_board)
+    #     sleep(5)
+    #     self.target_board[self.target] = self.target_icon
+    #     print('This is my empty target board')
+    #     print(self.empty_target_board)
+    #     print('This is my regular board')
+    #     print(self.target_board)
+    #     sleep(5)
+
 
     def result_shoot_touched(self):
         '''
@@ -527,6 +543,7 @@ class Shoot:
         '''
         Función que realiza disparos hasta que el target es agua
         '''
+        sleep(0.7)
         if self.player == 'player':
             print("Your turn")
         elif self.player == 'machine':
@@ -540,40 +557,51 @@ class Shoot:
         else:
             self.define_shooting_target_manual()
 
-        print('Shooting')
         sleep(0.7)
-        self.icon_target_changed()
-        self.define_print_target_board()
+        # self.icon_target_changed()
+        # self.define_print_target_board()
+        print(self.target_board[self.target])
+        print('estoy aqui')
         self.result_shoot()
         self.update_json_file()
 
     
     def result_shoot(self):
 
-        while self.empty_target_board[self.target] != self.shoot_water_icon:
+        while self.target_board[self.target] != self.shoot_water_icon:
+            print('Shooting\n')
             sleep(0.7)
-            if self.empty_target_board[self.target] != self.touched_icon and self.empty_target_board[self.target] != self.shoot_water_icon:
+            print(self.target_board[self.target])
+            if self.target_board[self.target] != self.touched_icon and self.target_board[self.target] != self.shoot_water_icon:
+                print('no he disparado aqui')
+                if self.target_board[self.target] == self.boat_icon:
+                    self.result_shoot_touched()
+                    # self.play_boat_sound()
+                    self.define_print_target_board()
+                    sleep(0.7)
+                    print('There is another turn\n')
 
-                    if self.empty_target_board[self.target] == self.boat_icon:
-                        self.result_shoot_touched()
-                        # self.play_boat_sound()
-                        self.define_print_target_board()
-
-                    elif self.empty_target_board[self.target] == self.octopus_icon:
-                        self.result_shoot_octopus()
-                        # self.play_octopus_sound()
-                        self.define_print_target_board()
-                    
-                    else:
-                        self.result_shoot_water()
-                        # self.play_water_sound()
-                        self.define_print_target_board()
+                elif self.target_board[self.target] == self.octopus_icon:
+                    self.result_shoot_octopus()
+                    # self.play_octopus_sound()
+                    self.define_print_target_board()
+                    sleep(0.7)
+                    print('There is another turn\n')
+                
+                else:
+                    self.result_shoot_water()
+                    # self.play_water_sound()
+                    self.define_print_target_board()
             else:
+                print('he disparado aqui')
                 if self.shooting_mode == 'R':
                     self.define_shooting_target_random()
+                    print('voy a volver a disparar')
+                    self.result_shoot()
                 else:
                     print("You have already shoot to this position, please choose your cell again, \n")
                     self.define_shooting_target_manual()
+                    self.result_shoot()
 
 
     def update_json_file(self):

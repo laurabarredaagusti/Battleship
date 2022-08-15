@@ -1,11 +1,11 @@
+import json
 from battleship_classes import *
 from battleship_variables import *
 from battleship_game_state import *
 
-empty_game()
+empty_game_state()
 
 Board("player")
-Board ("player_empty")
 Board("machine")
 Board("machine_empty")
 
@@ -16,14 +16,20 @@ player_shoot = Shoot('player', 'machine', 'machine_empty')
 machine_shoot = Shoot('machine', 'player', 'player_empty')
 
 while True:
+
+    with open(json_file, 'rb') as fp:
+            game_state = pickle.load(fp)
+
+    machine_board = game_state['machine_board']
+    player_board = game_state['player_board']
+    username = game_state['username']
+
     player_shoot.action_shoot()
+    if boat_icon not in machine_board:
+        print(username, ' WON')
+        break
+
     machine_shoot.action_shoot()
-#     # shooting_user(board_machine, board_shooting_user)
-#     # if "\U000026F5" not in board_machine:
-#     #     print("\nUser wins  \n")
-#     #     break
-#     # print("\nMachine's turn  \n")
-#     # shooting_random(board_user, board_shooting_machine)
-#     # if "\U000026F5" not in board_user:
-#     #     print("Machine wins  \n")
-#     #     break
+    if boat_icon not in player_board:
+        print('MACHINE WON')
+        break
